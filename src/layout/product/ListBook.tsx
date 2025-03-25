@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import BookProps from "./components/BookProps";
 import Book from "../../models/Book";
 import { getAllBooks } from "../../api/BookAPI";
+import { error } from "console";
 
 const ListBook : React.FC = () =>{
     const [listBook, setListBook] = useState<Book[]>([]);

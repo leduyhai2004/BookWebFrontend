@@ -1,22 +1,14 @@
 import React from "react";
 import Book from "../models/Book";
+import { MyRequest } from "./MyRequest";
 
-async function request(duongDan : string) {
-    // truy van den duong dan
-    const response = await fetch(duongDan);
-    if(!response.ok){
-        throw new Error(`Can not access ${duongDan}`)
-    }
-    // neu ok
-    return response.json();
-}
 
-export async function getAllBooks() : Promise<Book[]>{
+export async function getBooks(duongDan:string): Promise<Book[]> {
     const result : Book[] = [];
     //xac dinh endpoint
-    const duongDan : string = 'http://localhost:8080/books';
+    
     // goi phuong thuc reqest
-    const response = await request(duongDan);
+    const response = await MyRequest(duongDan);
 
     //lay ra json sach
     console.log(response);
@@ -37,4 +29,15 @@ export async function getAllBooks() : Promise<Book[]>{
         });
     }
     return result;
+}
+
+
+export async function getAllBooks() : Promise<Book[]>{
+    const duongDan : string = 'http://localhost:8080/books?sort=id,desc';
+    return getBooks(duongDan)
+}
+
+export async function getThreeNewestBook() : Promise<Book[]>{
+    const duongDan : string = 'http://localhost:8080/books?sort=id,desc&page=0&size=3';
+    return getBooks(duongDan)
 }
