@@ -3,24 +3,32 @@ import BookProps from "./components/BookProps";
 import Book from "../../models/Book";
 import { getAllBooks } from "../../api/BookAPI";
 import { error } from "console";
+import { Pagination } from "../utils/Pagination";
 
 const ListBook : React.FC = () =>{
     const [listBook, setListBook] = useState<Book[]>([]);
     const [loading,setLoading] = useState(true);
     const[error,setError] = useState(null);
+    const[nowPage,setNowPage] = useState(1);
+    const[totalPages,setTotalPages] = useState(0);
+
+    const pagination = (page : number) =>{
+        setNowPage(page);
+    }
 
     useEffect(()=>{
-        getAllBooks().then(
-            bookData =>{
-                setListBook(bookData)
+        getAllBooks(nowPage-1).then(
+            kq =>{
+                setListBook(kq.result);
                 setLoading(false);
+                setTotalPages(kq.totalPages);
             }
         ).catch(
             error =>{
                 setError(error);
             }
         );
-    },[])
+    },[nowPage]) // chi goi 1 lan
 
     if(loading){
         return(
@@ -39,13 +47,14 @@ const ListBook : React.FC = () =>{
     }
     return(
         <div className="container">
-            <div className="row mt-4">
+            <div className="row mt-4 mb-4">
                 {
                     listBook.map((book) =>(
                         <BookProps key={book.id} book ={book}/>
                     ))
                 }
             </div>
+            <Pagination nowPage={nowPage} totalPages={totalPages} pagination={pagination}/>
         </div>
     );
  }

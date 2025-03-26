@@ -13,8 +13,8 @@ const Carousel: React.FC = () =>{
 
     useEffect(()=>{
         getThreeNewestBook().then(
-            bookData =>{
-                setListBook(bookData)
+            kq =>{
+                setListBook(kq.result)
                 setLoading(false);
             }
         ).catch(
