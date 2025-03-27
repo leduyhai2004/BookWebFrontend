@@ -50,3 +50,14 @@ export async function getThreeNewestBook() : Promise<ResultInterface>{
     const duongDan : string = 'http://localhost:8080/books?sort=id,desc&page=0&size=3';
     return getBooks(duongDan)
 }
+
+export async function findBookBySearchKey(searchKey : string) : Promise<ResultInterface>{
+    let duongDan : string = `http://localhost:8080/books?sort=id,desc&size=8&page=0`
+    const duongDan2 : string = `http://localhost:8080/books/search/findByNameContainingIgnoreCase?sort=id,desc&size=8&page=0&name=${searchKey}`;
+
+    if(searchKey !== ''){
+        duongDan = duongDan2;
+    }
+    return getBooks(duongDan)
+}
+

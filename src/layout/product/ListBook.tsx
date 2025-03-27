@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import BookProps from "./components/BookProps";
 import Book from "../../models/Book";
-import { getAllBooks } from "../../api/BookAPI";
+import { findBookBySearchKey, getAllBooks } from "../../api/BookAPI";
 import { error } from "console";
 import { Pagination } from "../utils/Pagination";
+interface ListBookProp{
+    searchKey : string;
+}
+function ListBook({searchKey} : ListBookProp) {
 
-const ListBook : React.FC = () =>{
     const [listBook, setListBook] = useState<Book[]>([]);
     const [loading,setLoading] = useState(true);
     const[error,setError] = useState(null);
@@ -17,6 +20,7 @@ const ListBook : React.FC = () =>{
     }
 
     useEffect(()=>{
+        if(searchKey === ""){
         getAllBooks(nowPage-1).then(
             kq =>{
                 setListBook(kq.result);
@@ -28,7 +32,20 @@ const ListBook : React.FC = () =>{
                 setError(error);
             }
         );
-    },[nowPage]) // chi goi 1 lan
+        }else{
+            findBookBySearchKey(searchKey).then(
+                kq =>{
+                    setListBook(kq.result);
+                    setLoading(false);
+                    setTotalPages(kq.totalPages);
+                }
+            ).catch(
+                error =>{
+                    setError(error);
+                }
+            );
+        }
+    },[nowPage,searchKey]) // chi goi 1 lan
 
     if(loading){
         return(
@@ -42,6 +59,15 @@ const ListBook : React.FC = () =>{
         return(
             <div>
                 <h1>It has error: ${error}</h1>
+            </div>
+        );
+    }
+    if(listBook.length === 0){
+        return(
+            <div className="container">
+                <div className="d-flex align-items-center justify-content-center">
+                    <h1 className="">Can't find this book( • ᴖ • ｡)( • ᴖ • ｡)( • ᴖ • ｡)( • ᴖ • ｡)...</h1>
+                </div>
             </div>
         );
     }
