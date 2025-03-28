@@ -6,8 +6,9 @@ import { error } from "console";
 import { Pagination } from "../utils/Pagination";
 interface ListBookProp{
     searchKey : string;
+    type_id : number;
 }
-function ListBook({searchKey} : ListBookProp) {
+function ListBook({searchKey,type_id} : ListBookProp) {
 
     const [listBook, setListBook] = useState<Book[]>([]);
     const [loading,setLoading] = useState(true);
@@ -20,7 +21,7 @@ function ListBook({searchKey} : ListBookProp) {
     }
 
     useEffect(()=>{
-        if(searchKey === ""){
+        if(searchKey === "" && type_id === 0){
         getAllBooks(nowPage-1).then(
             kq =>{
                 setListBook(kq.result);
@@ -33,7 +34,7 @@ function ListBook({searchKey} : ListBookProp) {
             }
         );
         }else{
-            findBookBySearchKey(searchKey).then(
+            findBookBySearchKey(searchKey,type_id).then(
                 kq =>{
                     setListBook(kq.result);
                     setLoading(false);
@@ -45,7 +46,7 @@ function ListBook({searchKey} : ListBookProp) {
                 }
             );
         }
-    },[nowPage,searchKey]) // chi goi 1 lan
+    },[nowPage,searchKey,type_id]) // chi goi 1 lan
 
     if(loading){
         return(

@@ -51,13 +51,47 @@ export async function getThreeNewestBook() : Promise<ResultInterface>{
     return getBooks(duongDan)
 }
 
-export async function findBookBySearchKey(searchKey : string) : Promise<ResultInterface>{
+export async function findBookBySearchKey(searchKey : string, type_id : number) : Promise<ResultInterface>{
     let duongDan : string = `http://localhost:8080/books?sort=id,desc&size=8&page=0`
     const duongDan2 : string = `http://localhost:8080/books/search/findByNameContainingIgnoreCase?sort=id,desc&size=8&page=0&name=${searchKey}`;
 
-    if(searchKey !== ''){
+    if(searchKey !== '' && type_id ===0){
         duongDan = duongDan2;
+    }else if(searchKey === '' && type_id > 0){
+        duongDan = `http://localhost:8080/books/search/findByTypeList_Id?sort=id,desc&size=8&page=0&type_id=${type_id}`;
+    }else{
+        duongDan = `http://localhost:8080/books/search/findByNameContainingIgnoreCaseAndTypeList_Id?sort=id,desc&size=8&page=0&name=${searchKey}&type_id=${type_id}`
     }
     return getBooks(duongDan)
 }
+export async function findBookById(id : number) : Promise<Book|null>{
+    let duongDan : string = `http://localhost:8080/books/${id}`
+    let result : Book;
+    try {
+    // goi phuong thuc reqest
+    const response = await fetch(duongDan);
+        if(!response.ok){
+            throw new Error("Error in processing call api")
+        }
+    const bookData = await response.json();
+    if(bookData){
+        return{
+            id : bookData.id,
+            name: bookData.name,
+            author: bookData.author,
+            ISBN: bookData.ISBN,
+            description: bookData.description,
+            priceOrigin: bookData.priceOrigin,
+            priceSell: bookData.priceSell,
+            quantity: bookData.quantity,
+            rating: bookData.rating,
+        }
+    }else{
+        throw new Error("Non existed Book!");
+    }
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
 
+}

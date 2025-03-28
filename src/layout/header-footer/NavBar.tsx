@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface NavBarProps{
   searchKey : string;
@@ -29,7 +30,7 @@ function NavBar({searchKey,setSearchKey} : NavBarProps){
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href="#">Trang chủ</a>
+                <Link className="nav-link active" aria-current="page" to="/">Trang chủ</Link>
               </li>
               <li className="nav-item">
                 <a className="nav-link" href="#">Liên hệ</a>
@@ -39,9 +40,11 @@ function NavBar({searchKey,setSearchKey} : NavBarProps){
                   Thể loại
                 </a>
                 <ul className="dropdown-menu">
-                  <li><a className="dropdown-item" href="#">Thể loại 1</a></li>
-                  <li><a className="dropdown-item" href="#">Thể loại 2</a></li>
-                  <li><a className="dropdown-item" href="#">Thể loại 3</a></li>
+                  <li><Link className="dropdown-item" to="/1">Thể loại 1</Link></li>
+                  <li><Link className="dropdown-item" to="/2">Thể loại 2</Link></li>
+                  <li><Link className="dropdown-item" to="/3">Thể loại 3</Link></li>
+                  <li><Link className="dropdown-item" to="/4">Thể loại 4</Link></li>
+                  <li><Link className="dropdown-item" to="/5">Thể loại 5</Link></li>
                   <li><hr className="dropdown-divider"/></li>
                   <li><a className="dropdown-item" href="#">Something else here</a></li>
                 </ul>

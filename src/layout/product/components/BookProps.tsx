@@ -3,6 +3,7 @@ import Book from "../../../models/Book";
 import { useEffect,useState } from "react";
 import Image from "../../../models/Image";
 import { getAllImagesOfABook, getOneImageOfABook } from "../../../api/ImageAPI";
+import { Link } from "react-router-dom";
 
 interface BookPropsInterface{
     book : Book;
@@ -42,18 +43,23 @@ interface BookPropsInterface{
                 </div>
             );
         }
-    
+    let dataImage : string = "";
+    if(listImage[0] && listImage[0].dataImage){
+        dataImage = listImage[0].dataImage;
+    }
     return(
         <div className="col-md-3 mt-2">
             <div className="card">
-                { listImage[0] && listImage[0].dataImage && <img src={`${listImage[0].dataImage}`}
-                 className="card-img-top"
-                  alt={props.book.author}
-                   style={{height:'200px'}} />
-                }
+            <Link to={`/books/${props.book.id}`}>
+                <img src={dataImage} className="card-img-top" alt={props.book.name} style={{ height: "200px" }} />
+            </Link>
+
 
                 <div className="card-body">
-                    <h5 className="card-title">{props.book.name}</h5>
+                    <Link  to={`/books/${props.book.id}`} style={{textDecoration:'none'}}>
+                        <h5 className="card-title">{props.book.name}</h5>
+                    </Link>
+                    
                     <p className="card-text">{props.book.description}</p>
                     <div className="price">
                         <span className="original-price">
