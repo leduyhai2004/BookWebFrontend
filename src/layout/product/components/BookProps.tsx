@@ -4,6 +4,7 @@ import { useEffect,useState } from "react";
 import Image from "../../../models/Image";
 import { getAllImagesOfABook, getOneImageOfABook } from "../../../api/ImageAPI";
 import { Link } from "react-router-dom";
+import renderRating from './../../utils/RenderStar';
 
 interface BookPropsInterface{
     book : Book;
@@ -71,15 +72,17 @@ interface BookPropsInterface{
                     </div>
                     <div className="row mt-2" role="group">
                         <div className="col-6">
-                            <a href="#" className="btn btn-secondary btn-block">
-                                <i className="fas fa-heart"></i>
-                            </a>
+                            {renderRating(props.book.rating ? props.book.rating:0)}
                         </div>
-                        <div className="col-6">
-                            <a href="#" className="btn btn-danger btn-block">
-                                <i className="fas fa-shopping-cart"></i>
-                            </a>
-                        </div>
+                            <div className="col-6 text-end">
+                                <a href="#" className="btn btn-secondary btn-block me-2">
+                                    <i className="fas fa-heart"></i>
+                                </a>
+                            
+                                <a href="#" className="btn btn-danger btn-block">
+                                    <i className="fas fa-shopping-cart"></i>
+                                </a>
+                            </div>
                     </div>
                 </div>
             </div>

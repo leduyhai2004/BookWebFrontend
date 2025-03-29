@@ -6,6 +6,8 @@ import { getAllEvaluationsOfABook } from "../../../api/EvaluationAPI";
 import Evaluation from "../../../models/Evaluation";
 import User from "../../../models/User";
 import { getUserByEvaluation } from "../../../api/EvaluationAPI";
+import { Star, StarFill, StarHalf } from "react-bootstrap-icons";
+import renderRating from "../../utils/RenderStar";
 
 interface EvaluateProductInterface{
     book_id : number;
@@ -33,6 +35,7 @@ interface EvaluateProductInterface{
         },[])
         console.log(listEvaluation.length);
 
+
         if(loading){
             return(
                 <div>
@@ -56,7 +59,7 @@ interface EvaluateProductInterface{
             listEvaluation.map((danhGia,index) =>(
             <div className="border-bottom pb-3 mb-3">
                 <p className="mb-1 fw-bold">Chua lay dc username</p>
-                <span className="badge bg-warning text-dark">{danhGia.ratingMark} ★ ★ ★ ★ ★</span>
+                <span >{danhGia.ratingMark} {renderRating(danhGia.ratingMark?danhGia.ratingMark :0)}</span>
                 <p className="text-muted">{danhGia.comment}</p>
             </div>
             ))

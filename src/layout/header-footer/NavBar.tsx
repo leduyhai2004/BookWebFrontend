@@ -1,4 +1,5 @@
 import React, { ChangeEvent, useState } from "react";
+import { House, Search } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 
 interface NavBarProps{
@@ -30,7 +31,8 @@ function NavBar({searchKey,setSearchKey} : NavBarProps){
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
               <li className="nav-item">
-                <Link className="nav-link active" aria-current="page" to="/">Trang chủ</Link>
+                <Link className="nav-link active" aria-current="page" to="/">Trang chủ
+                </Link>
               </li>
               <li className="nav-item">
                 <a className="nav-link" href="#">Liên hệ</a>
@@ -57,7 +59,9 @@ function NavBar({searchKey,setSearchKey} : NavBarProps){
             
               <form className="d-flex">
                 <input className="form-control me-2" type="search" placeholder="Tìm kiếm" aria-label="Search" onChange={onSearchInput} value={tuKhoaTamThoi} onKeyDown={handleKeyDown} />
-                  <button className="btn btn-outline-success me-3" type="button" onClick={handleSearch} >Tìm</button>
+                  <button className="btn btn-outline-success me-3" type="button" onClick={handleSearch} >
+                    <Search />
+                  </button>
               </form>
 
               <ul className="navbar-nav me-1">

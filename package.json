@@ -12,6 +12,7 @@
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "react": "^19.0.0",
+    "react-bootstrap-icons": "^1.11.5",
     "react-dom": "^19.0.0",
     "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^7.4.0",

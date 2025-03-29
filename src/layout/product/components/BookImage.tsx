@@ -3,6 +3,8 @@ import { useEffect,useState } from "react";
 import Image from "../../../models/Image";
 import { getAllImagesOfABook, getOneImageOfABook } from "../../../api/ImageAPI";
 import { Carousel } from "react-responsive-carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+
 
 interface BookImageInterface{
     book_id : number;
@@ -11,21 +13,14 @@ interface BookImageInterface{
     
     const book_id : number = props.book_id;
     const [listImage, setListImage] = useState<Image[]>([]);
-    const [choosenImage, setChoosenImage] = useState<Image|null>(null);
     const [loading,setLoading] = useState(true);
     const[error,setError] = useState(null);
 
-    const chooseImage = (image : Image) =>{
-        setChoosenImage(image);
-    }
     
         useEffect(()=>{
             getAllImagesOfABook(book_id).then(
                 danhSach =>{
                     setListImage(danhSach)
-                    if(danhSach.length){
-                        setChoosenImage(danhSach[0]);
-                    }
                     setLoading(false);
                 }
             ).catch(
@@ -55,20 +50,17 @@ interface BookImageInterface{
     //     dataImage = listImage[0].dataImage;
     // }
     return(
-        <div className="">
-            <div >
-                {(choosenImage) && <img src={choosenImage.dataImage} style={{height:'400px', width:'400px'}}/>}
-            </div>
-            <div className="row mt-4">
-                
+        <div className="row">
+            <div className="col-12">
+                <Carousel showArrows={true} showIndicators={true}>
                     {
-                        listImage.map((image,index) => (
-                            <div className="col-3" key={index} onClick={()=>chooseImage(image)}>
-                                {(image) && <img src={image.dataImage} style={{width:'50px'}}/>}
+                        listImage.map((image,index)=>(
+                            <div key={index}>
+                                <img src={image.dataImage} alt={image.name} style={{maxWidth:'200px'}} />
                             </div>
-                         ) )
+                        ))
                     }
-                
+                </Carousel>
             </div>
         </div>
     );

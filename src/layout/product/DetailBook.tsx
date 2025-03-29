@@ -5,6 +5,8 @@ import Book from "../../models/Book";
 import { findBookById } from "../../api/BookAPI";
 import BookImage from "./components/BookImage";
 import EvaluateProduct from "./components/EvaluateProduct";
+import renderRating from './../utils/RenderStar';
+import FormatNumber from "../utils/FormatNumber";
 
  const DetailBook : React.FC = () =>{
     const {id} = useParams();
@@ -12,6 +14,27 @@ import EvaluateProduct from "./components/EvaluateProduct";
     const[book,setBook] = useState<Book|null>(null);
     const [loading,setLoading] = useState(true);
     const[error,setError] = useState(null);
+    const [quantity,setQuantity] = useState(1);
+
+
+    const increaseQuantity = () =>{
+        const numberOfBooksWeHas = (book&&book?.quantity ? book?.quantity:0);
+        if(quantity < numberOfBooksWeHas)
+        setQuantity(quantity+1);
+    }
+    const decreaseQuantity = () =>{
+        if(quantity >=2){
+            setQuantity(quantity-1);
+        }
+    }
+    const handleQuantity = (event : React.ChangeEvent<HTMLInputElement>) =>{
+        const newQuantity = parseInt(event.target.value);
+        const numberOfBooksWeHas = (book&&book?.quantity ? book?.quantity:0);
+        if(!isNaN(newQuantity) && newQuantity>=1 && newQuantity <= numberOfBooksWeHas){
+            setQuantity(newQuantity);
+        }
+    }
+
     let book_id: number = 0;
     try {
         book_id = parseInt(id+'');
@@ -65,10 +88,10 @@ import EvaluateProduct from "./components/EvaluateProduct";
                     </div>
                     <div className="col-md-6">
                         <div className="d-flex justify-content-between align-items-center">
-                            <h2 className="fw-bold text-dark">Tên Sản Phẩm</h2>
+                            <h2 className="fw-bold text-dark">{book.name}</h2>
                             <button className="btn btn-light border"><i className="fas fa-heart text-danger"></i></button>
                         </div>
-                        <h4 className="text-danger fw-bold fs-4">$199.99</h4>
+                        <h4 className="text-danger fw-bold">{FormatNumber(book.priceSell)} VND</h4>
                         <table className="table">
                                 <thead>
                                     <tr>
@@ -87,9 +110,29 @@ import EvaluateProduct from "./components/EvaluateProduct";
                                     </tr>
                                 </tbody>
                             </table>
-                        <p>Mota san pham</p>
+                        <p>{book.description}</p>
                         <div className="mb-3">
-                            <span className="badge bg-warning text-dark">★ ★ ★ ★ ☆</span> (4.5/5)
+                            <span className=" text-dark">{renderRating(book.rating ?book.rating:0 )}</span> ({book.rating})
+                        </div>
+                        <div className="col-4 mb-2">
+                        <div className="mb-2">Quantity</div>
+                            <div className="d-flex align-items-center justify-content-between gap-8">
+                                
+                                <div className="d-flex align-items-center ">
+                                    <button className="btn btn-outline-primary me-2" onClick={decreaseQuantity}>-</button>
+                                    <input className="form-control text-center" type="number" value={quantity} min={1} onChange={handleQuantity} style={{width:'100px'}}/>
+                                    <button className="btn btn-outline-primary ms-2" onClick={increaseQuantity}>+</button>
+                                </div>
+                                    {
+                                        book.priceSell &&(
+                                            <div className="text-center ms-5">
+                                                TotalPrice<br/>
+                                                <h4>{quantity * book.priceSell}đ</h4>
+                                            </div>
+                                        )
+                                    }
+
+                            </div>
                         </div>
                         <div className="d-flex gap-2">
                             <button className="btn btn-outline-primary w-50 d-flex align-items-center justify-content-center">
