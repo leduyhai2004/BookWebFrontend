@@ -6,6 +6,7 @@ import HomePage from './layout/homepage/HomePage';
 import { BrowserRouter as Router, Routes, Route, BrowserRouter } from "react-router-dom";
 import DetailBook from './layout/product/DetailBook';
 import About from './layout/about/About';
+import RegisterUser from './layout/user/RegisterUser';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path='/:type_id' element={<HomePage searchKey={searchKey}/>}/>
         <Route path='/books/:id' element={<DetailBook/>}/>
         <Route path='/about' element={<About/>}/>
+        <Route path='/register' element={<RegisterUser/>}/>
       </Routes>
       <Footer/>
     </BrowserRouter>
