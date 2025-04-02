@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, BrowserRouter } from "react-rou
 import DetailBook from './layout/product/DetailBook';
 import About from './layout/about/About';
 import RegisterUser from './layout/user/RegisterUser';
+import ActiveAccount from './layout/user/ActiveAccount';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path='/books/:id' element={<DetailBook/>}/>
         <Route path='/about' element={<About/>}/>
         <Route path='/register' element={<RegisterUser/>}/>
+        <Route path='/active' element={<ActiveAccount/>} />
       </Routes>
       <Footer/>
     </BrowserRouter>

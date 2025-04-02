@@ -7,6 +7,8 @@ export default function RegisterUser(){
     const [password,setPassword] = useState('');
     const [phoneNumber,setPhoneNumber] = useState('');
     const [gender,setGender] = useState('F');
+    const [isActive,setIsActive] = useState('0');
+    const [idOfActivation,setIdOfActivation] = useState('');
 
     //thong bao loi
     const [errorUsername,setErrorUsername] = useState('');
@@ -45,7 +47,8 @@ export default function RegisterUser(){
                         password : password,
                         gender : gender,
                         phoneNumber : phoneNumber,
-
+                        isActive : isActive,
+                        idOfActivation : idOfActivation,
                     })
                 });
                 if(response.ok){
