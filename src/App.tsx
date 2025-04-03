@@ -11,6 +11,8 @@ import ActiveAccount from './layout/user/ActiveAccount';
 import Login from './layout/user/Login';
 import TestLogin from './layout/user/TestLogin';
 import BookForm from './layout/admin/BookForm';
+import BookForm_Admin from './layout/admin/BookForm';
+import Error403 from './layout/error-page/403page';
 
 
 function App() {
@@ -29,7 +31,8 @@ function App() {
         <Route path='/active' element={<ActiveAccount/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/test' element={<TestLogin/>} />
-        <Route path='/admin/book-form' element={<BookForm/>} />
+        <Route path='/403-error' element={<Error403/>} />
+        <Route path='/admin/book-form' element={<BookForm_Admin/>} />
       </Routes>
       <Footer/>
     </BrowserRouter>

@@ -2,8 +2,9 @@
 import type React from "react"
 import { type FormEvent, useState, type ChangeEvent } from "react"
 import "../../css/BookForm.css"
+import RequireAdmin from "./RequireAdmin"
 
-const BookForm: React.FC = () => {
+const BookForm: React.FC = (props) => {
   const [book, setBook] = useState({
     id: 0,
     name: "",
@@ -217,6 +218,6 @@ const BookForm: React.FC = () => {
     </div>
   )
 }
-
-export default BookForm
+const BookForm_Admin = RequireAdmin(BookForm);
+export default BookForm_Admin
 
