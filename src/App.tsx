@@ -8,6 +8,9 @@ import DetailBook from './layout/product/DetailBook';
 import About from './layout/about/About';
 import RegisterUser from './layout/user/RegisterUser';
 import ActiveAccount from './layout/user/ActiveAccount';
+import Login from './layout/user/Login';
+import TestLogin from './layout/user/TestLogin';
+import BookForm from './layout/admin/BookForm';
 
 
 function App() {
@@ -24,6 +27,9 @@ function App() {
         <Route path='/about' element={<About/>}/>
         <Route path='/register' element={<RegisterUser/>}/>
         <Route path='/active' element={<ActiveAccount/>} />
+        <Route path='/login' element={<Login/>} />
+        <Route path='/test' element={<TestLogin/>} />
+        <Route path='/admin/book-form' element={<BookForm/>} />
       </Routes>
       <Footer/>
     </BrowserRouter>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 export default function RegisterUser(){
     const [username,setUsername] = useState('');
     const [email,setEmail] = useState('');
@@ -249,6 +250,8 @@ export default function RegisterUser(){
                      {/* Hiển thị thông báo đăng ký thành công hoặc thất bại */}
                      {successMessage && <div style={{ color: 'green', marginTop: '10px' }}>{successMessage}</div>}
                      {errorMessage && <div style={{ color: 'red', marginTop: '10px' }}>{errorMessage}</div>}
+                     <p>Have an account?  </p>
+                     <Link to="/login">Back to Login</Link>
                 </form>
                 </div>
                 </div>
