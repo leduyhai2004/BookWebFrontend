@@ -9,7 +9,7 @@ const BookForm: React.FC = (props) => {
     id: 0,
     name: "",
     author: "",
-    ISBN: "",
+    isbn: "",
     description: "",
     priceOrigin: 0,
     priceSell: 0,
@@ -17,8 +17,9 @@ const BookForm: React.FC = (props) => {
     rating: 0,
   })
 
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null
@@ -29,57 +30,90 @@ const BookForm: React.FC = (props) => {
       setImagePreview(previewUrl)
     }
   }
-      // Create FormData to handle file upload
-      const formData = new FormData()
 
-      // Add all book properties to FormData
-      formData.append("id", book.id.toString())
-      formData.append("name", book.name)
-      formData.append("author", book.author)
-      formData.append("ISBN", book.ISBN)
-      formData.append("description", book.description)
-      formData.append("priceOrigin", book.priceOrigin.toString())
-      formData.append("priceSell", book.priceSell.toString())
-      formData.append("quantity", book.quantity.toString())
-      formData.append("rating", book.rating.toString())
-  
-      if (imageFile) {
-        formData.append("image", imageFile)
-      }
+    // Function to convert File to base64
+    const fileToBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+    
+        reader.onload = () => {
+          const result = reader.result;
+          if (typeof result === "string") {
+            // Return the full Data URL, including the prefix
+            resolve(result);
+          } else {
+            reject(new Error("Failed to convert file to base64"));
+          }
+        };
+    
+        reader.onerror = () => {
+          reject(new Error("Error reading file"));
+        };
+    
+        reader.readAsDataURL(file);
+      });
+    };
   
       console.log("Form submitted with image:", imageFile?.name)
 
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    const token = localStorage.getItem('token');
-    fetch('http://localhost:8080/books',{
-        method : "POST",
-        headers :{
-            'Content-Type' : 'application/json',
-            'Authorization' : `Bearer ${token}`
-        },
-        body: JSON.stringify(book)
-    }).then((response)=>{
-        if(response.ok){
-            window.alert("Add boo successful");
-            setBook({
-                id: 0,
-                name: "",
-                author: "",
-                ISBN: "",
-                description: "",
-                priceOrigin: 0,
-                priceSell: 0,
-                quantity: 0,
-                rating: 0,
-            })
-        }else{
-            window.alert("Error add book");
-            console.log("Sai o cho response BookForm")
+      const handleSubmit = async (event: FormEvent) => {
+        event.preventDefault();
+        setIsSubmitting(true);
+    
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            throw new Error("Authentication required");
+          }
+          // Prepare the payload based on the book state.
+          // If an image file is selected, convert it and add it to the payload's imageList.
+          const payload: any = { ...book };
+          if (imageFile) {
+            const base64Data = await fileToBase64(imageFile);
+            payload.imageList = [
+              {
+                name: imageFile.name,
+                icon: true, // if this is the main icon image
+                link: "",
+                dataImage: base64Data,
+                // No need to add the book reference; the backend will set it.
+              },
+            ];
+          }
+          const response = await fetch("http://localhost:8080/api/books", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          });
+          if (!response.ok) {
+            throw new Error("Failed to create book");
+          }
+    
+          window.alert("Book added successfully");
+          // Reset the form state on success
+          setBook({
+            id: 0,
+            name: "",
+            author: "",
+            isbn: "",
+            description: "",
+            priceOrigin: 0,
+            priceSell: 0,
+            quantity: 0,
+            rating: 0,
+          });
+          setImageFile(null);
+          setImagePreview(null);
+        } catch (error) {
+          console.error("Error adding book:", error);
+          window.alert("Error adding book");
+        } finally {
+          setIsSubmitting(false);
         }
-    })
-
-  }
+      };
 
   return (
     <div className="book-form-container">
@@ -138,8 +172,8 @@ const BookForm: React.FC = (props) => {
               <input
                 type="text"
                 className="form-control"
-                value={book.ISBN}
-                onChange={(e) => setBook({ ...book, ISBN: e.target.value })}
+                value={book.isbn}
+                onChange={(e) => setBook({ ...book, isbn: e.target.value })}
                 required
               />
             </div>
