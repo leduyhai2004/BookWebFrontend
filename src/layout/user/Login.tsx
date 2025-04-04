@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import "../../css/login.css"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { METHODS } from "http";
 const Login = () =>{
     const [username, setUserName] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [notification, setNotification] = useState('');
+    const navigate = useNavigate();
 
     const handleLogin=()=>{
         const loginReq = {
@@ -35,6 +36,7 @@ const Login = () =>{
                 localStorage.setItem('token',jwt);
                 setNotification('Login success')
                 //dieu huong den trang nao do, tuy
+                navigate("/");
 
             }
         ).catch((error)=>{

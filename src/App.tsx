@@ -13,6 +13,7 @@ import TestLogin from './layout/user/TestLogin';
 import BookForm from './layout/admin/BookForm';
 import BookForm_Admin from './layout/admin/BookForm';
 import Error403 from './layout/error-page/403page';
+import Profile from './layout/user/Profile';
 
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         <Route path='/test' element={<TestLogin/>} />
         <Route path='/403-error' element={<Error403/>} />
         <Route path='/admin/book-form' element={<BookForm_Admin/>} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       <Footer/>
     </BrowserRouter>
