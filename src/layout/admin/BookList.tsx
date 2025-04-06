@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import RequireAdmin from "./RequireAdmin"
 import type Book from "../../models/Book"
@@ -9,7 +9,7 @@ import { getAllBooks } from "../../api/BookAPI"
 import { Eye, Pencil, Trash } from "react-bootstrap-icons"
 import FormatNumber from "../utils/FormatNumber"
 import { Pagination } from "../utils/Pagination"
-
+import { findBookBySearchKey } from "../../api/BookAPI"
 const BookList: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
@@ -20,25 +20,40 @@ const BookList: React.FC = () => {
   const [sortField, setSortField] = useState<string>("id")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const [isDeleting, setIsDeleting] = useState(false)
+  const [tuKhoaTamThoi, setTuKhoaTamThoi] = useState("")
   const navigate = useNavigate()
 
   // Fetch books from API
   useEffect(() => {
     fetchBooks()
-  }, [currentPage, sortField, sortDirection])
+  }, [currentPage, sortField, sortDirection,searchTerm])
 
   const fetchBooks = async () => {
     setLoading(true)
-    try {
-      const result = await getAllBooks(currentPage - 1)
-      setBooks(result.result)
-      setTotalPages(result.totalPages)
-      setLoading(false)
-    } catch (err) {
-      console.error("Error fetching books:", err)
-      setError("Failed to load books. Please try again.")
-      setLoading(false)
+    if(searchTerm === ""){
+      try {
+        const result = await getAllBooks(currentPage - 1)
+        setBooks(result.result)
+        setTotalPages(result.totalPages)
+        setLoading(false)
+      } catch (err) {
+        console.error("Error fetching books:", err)
+        setError("Failed to load books. Please try again.")
+        setLoading(false)
+      }
+    }else{
+      try {
+        const result = await findBookBySearchKey(searchTerm,0);
+        setBooks(result.result)
+        setTotalPages(result.totalPages)
+        setLoading(false)
+      } catch (err) {
+        console.error("Error fetching books:", err)
+        setError("Failed to load books. Please try again.")
+        setLoading(false)
+      }
     }
+    
   }
 
   // Handle pagination
@@ -55,12 +70,23 @@ const BookList: React.FC = () => {
       setSortDirection("asc")
     }
   }
-
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        e.preventDefault() // The form will not submit and reload the page
+        handleSearch();
+      }
+    }
+      const onSearchInput = (e: ChangeEvent<HTMLInputElement>) => {
+        setTuKhoaTamThoi(e.target.value)
+      }
   // Handle search
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSearch = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     // Reset to first page when searching
     setCurrentPage(1)
+    setSearchTerm(tuKhoaTamThoi);
     // Implement search functionality here
     // This would typically call a different API endpoint with the search term
     console.log("Searching for:", searchTerm)
@@ -146,8 +172,9 @@ const BookList: React.FC = () => {
             type="text"
             className="form-control"
             placeholder="Search books..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={onSearchInput}
+            value={tuKhoaTamThoi}
+            onKeyDown={handleKeyDown}
           />
           <button className="btn btn-outline-secondary" type="submit">
             Search
