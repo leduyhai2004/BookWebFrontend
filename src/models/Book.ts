@@ -2,7 +2,7 @@ class Book{
     id : number;
     name?: string; // co the bi null
     author?: string;
-    ISBN?: string;
+    isbn?: string;
     description?: string;
     priceOrigin?: number;
     priceSell?: number;
@@ -13,7 +13,7 @@ class Book{
         id : number,
         name?: string, // co the bi null
         author?: string,
-        ISBN?: string,
+        isbn?: string,
         description?: string,
         priceOrigin?: number,
         priceSell?: number,
@@ -23,7 +23,7 @@ class Book{
         this.id = id;
         this.name = name;
         this.author = author;
-        this.ISBN = ISBN;
+        this.isbn = isbn;
         this.description = description;
         this.priceOrigin = priceOrigin;
         this.priceSell = priceSell;

@@ -25,11 +25,11 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
     const token = localStorage.getItem("token")
     if (token) {
       try {
-        const decodedToken = jwtDecode<any>(token);
-        console.log(decodedToken);
-        setIsLoggedIn(true);
-        setUsername(decodedToken.sub);
-        setIsAdmin(decodedToken.isAdmin || false);
+        const decodedToken = jwtDecode<any>(token)
+        console.log(decodedToken)
+        setIsLoggedIn(true)
+        setUsername(decodedToken.sub)
+        setIsAdmin(decodedToken.isAdmin || false)
 
         // Get cart items count
         const cart = JSON.parse(localStorage.getItem("cart") || "[]")
@@ -167,10 +167,28 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
               </ul>
             </li>
             {isAdmin && (
-              <li className="nav-item">
-                <Link className="nav-link" to="/admin/book-form">
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
                   Admin Panel
-                </Link>
+                </a>
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link className="dropdown-item" to="/admin/books">
+                      Manage Books
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/admin/book-form">
+                      Add New Book
+                    </Link>
+                  </li>
+                </ul>
               </li>
             )}
           </ul>

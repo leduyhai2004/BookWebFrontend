@@ -10,6 +10,7 @@ import FormatNumber from "../utils/FormatNumber";
 
  const DetailBook : React.FC = () =>{
     const {id} = useParams();
+    console.log("Sach chi tiet voi id",id);
     //khai bao
     const[book,setBook] = useState<Book|null>(null);
     const [loading,setLoading] = useState(true);
