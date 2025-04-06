@@ -131,7 +131,7 @@ const BookUpdateForm: React.FC = () => {
       // In a real application, you would make an API call to delete the image
       const token = localStorage.getItem("token")
       if (!token) {
-        throw new Error("Authentication required")
+        throw new Error("Authentication required: token")
       }
 
       // Only attempt to delete if we have an image ID
