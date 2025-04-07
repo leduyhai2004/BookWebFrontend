@@ -210,20 +210,14 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
 
           <ul className="navbar-nav me-1">
             <li className="nav-item dropdown">
-              <a
-                href="#"
-                className="nav-link position-relative"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+              <Link to="/cart" className="nav-link position-relative">
                 <i className="fas fa-shopping-cart"></i>
                 {cartItems > 0 && (
                   <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                     {cartItems}
                   </span>
                 )}
-              </a>
+              </Link>
               <ul className="dropdown-menu dropdown-menu-end">
                 <li>
                   <Link className="dropdown-item" to="/cart">
@@ -241,20 +235,14 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
 
           <ul className="navbar-nav me-1">
             <li className="nav-item dropdown">
-              <a
-                href="#"
-                className="nav-link position-relative"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+              <Link to="/favorites" className="nav-link position-relative">
                 <i className="fas fa-heart"></i>
                 {favoritesItems > 0 && (
                   <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                     {favoritesItems}
                   </span>
                 )}
-              </a>
+              </Link>
               <ul className="dropdown-menu dropdown-menu-end">
                 <li>
                   <Link className="dropdown-item" to="/favorites">

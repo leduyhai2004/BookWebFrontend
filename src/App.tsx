@@ -16,6 +16,10 @@ import Error403 from './layout/error-page/403page';
 import Profile from './layout/user/Profile';
 import BookList_Admin from './layout/admin/BookList';
 import BookUpdateForm_Admin from './layout/admin/BookUpdateForm';
+import 'react-toastify/dist/ReactToastify.css';
+import CartPage from './layout/cart/CartPage';
+import FavoritesPage from './layout/favourites/FavouritesPage';
+
 
 
 function App() {
@@ -39,6 +43,8 @@ function App() {
         <Route path="/admin/books" element={<BookList_Admin />} />
         <Route path="/admin/book-form/:id" element={<BookUpdateForm_Admin />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
       </Routes>
       <Footer/>
     </BrowserRouter>
