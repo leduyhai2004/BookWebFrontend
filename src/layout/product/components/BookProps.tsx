@@ -20,25 +20,42 @@ const BookProps: React.FC<BookPropsInterface> = (props) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [checkingFavorite, setCheckingFavorite] = useState(true)
 
   useEffect(() => {
-    getAllImagesOfABook(book_id)
-      .then((imageData) => {
+    const fetchData = async () => {
+      try {
+        // Fetch images
+        const imageData = await getAllImagesOfABook(book_id)
         setListImage(imageData)
-        setLoading(false)
-      })
-      .catch((error) => {
-        setError(error)
-      })
 
-    // Check if book is in favorites
-    setIsFavorite(isInFavorites(book_id))
+        // Check if book is in favorites
+        setCheckingFavorite(true)
+        const favoriteStatus = await isInFavorites(book_id)
+        setIsFavorite(favoriteStatus)
+        setCheckingFavorite(false)
+
+        setLoading(false)
+      } catch (error) {
+        console.error("Error in BookProps:", error)
+        // setError(error)
+        setLoading(false)
+        setCheckingFavorite(false)
+      }
+    }
+
+    fetchData()
   }, [book_id])
 
-  // Listen for favorites updates
+  // Update the useEffect that listens for favorites updates
   useEffect(() => {
-    const handleFavoritesUpdate = () => {
-      setIsFavorite(isInFavorites(book_id))
+    const handleFavoritesUpdate = async () => {
+      try {
+        const result = await isInFavorites(book_id)
+        setIsFavorite(result)
+      } catch (error) {
+        console.error("Error checking favorites:", error)
+      }
     }
 
     window.addEventListener("favoritesUpdated", handleFavoritesUpdate)
@@ -54,37 +71,66 @@ const BookProps: React.FC<BookPropsInterface> = (props) => {
     toast.success(`Added ${props.book.name} to cart!`)
   }
 
-  const handleToggleFavorite = (e: React.MouseEvent) => {
+  // Update the handleToggleFavorite function to use the API
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault()
-    if (isFavorite) {
-      removeFromFavorites(book_id)
-      toast.info(`Removed ${props.book.name} from favorites`)
-    } else {
-      addToFavorites(props.book)
-      toast.success(`Added ${props.book.name} to favorites!`)
+
+    try {
+      if (isFavorite) {
+        const success = await removeFromFavorites(book_id)
+        if (success) {
+          toast.info(`Removed ${props.book.name} from favorites`)
+          setIsFavorite(false)
+        } else {
+          toast.error("Failed to remove from favorites")
+        }
+      } else {
+        const success = await addToFavorites(book_id)
+        if (success) {
+          toast.success(`Added ${props.book.name} to favorites!`)
+          setIsFavorite(true)
+        } else {
+          toast.error("Failed to add to favorites")
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error)
+      toast.error("An error occurred. Please try again.")
     }
-    setIsFavorite(!isFavorite)
   }
 
   if (loading) {
     return (
-      <div>
-        <h1>The Page is loading ...</h1>
+      <div className="col-md-3 mt-2">
+        <div className="card" style={{ height: "400px" }}>
+          <div className="d-flex justify-content-center align-items-center h-100">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div>
-        <h1>It has error: ${error}</h1>
+      <div className="col-md-3 mt-2">
+        <div className="card">
+          <div className="card-body">
+            <h5 className="card-title text-danger">Error</h5>
+            <p className="card-text">Failed to load book information</p>
+          </div>
+        </div>
       </div>
     )
   }
+
   let dataImage = ""
   if (listImage[0] && listImage[0].dataImage) {
     dataImage = listImage[0].dataImage
   }
+
   return (
     <div className="col-md-3 mt-2">
       <div className="card">
@@ -93,7 +139,7 @@ const BookProps: React.FC<BookPropsInterface> = (props) => {
             src={dataImage || "/placeholder.svg"}
             className="card-img-top"
             alt={props.book.name}
-            style={{ height: "200px" }}
+            style={{ height: "200px", objectFit: "cover" }}
           />
         </Link>
 
@@ -115,10 +161,15 @@ const BookProps: React.FC<BookPropsInterface> = (props) => {
             <div className="col-6">{renderRating(props.book.rating ? props.book.rating : 0)}</div>
             <div className="col-6 text-end">
               <button
-                className={`btn ${isFavorite ? "btn-danger" : "btn-secondary"} btn-sm me-2`}
+                className={`btn ${isFavorite ? "btn-danger" : "btn-light border"} btn-sm me-2`}
                 onClick={handleToggleFavorite}
+                disabled={checkingFavorite}
               >
-                <i className="fas fa-heart"></i>
+                {checkingFavorite ? (
+                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                ) : (
+                  <i className="fas fa-heart"></i>
+                )}
               </button>
 
               <button className="btn btn-primary btn-sm" onClick={handleAddToCart}>
@@ -132,4 +183,3 @@ const BookProps: React.FC<BookPropsInterface> = (props) => {
   )
 }
 export default BookProps
-

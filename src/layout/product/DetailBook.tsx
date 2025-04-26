@@ -22,6 +22,7 @@ const DetailBook: React.FC = () => {
   const [error, setError] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [checkingFavorite, setCheckingFavorite] = useState(true)
 
   const increaseQuantity = () => {
     const numberOfBooksWeHas = book && book?.quantity ? book?.quantity : 0
@@ -49,17 +50,32 @@ const DetailBook: React.FC = () => {
     }
   }
 
-  const handleToggleFavorite = () => {
+  // Update the handleToggleFavorite function to use the API
+  const handleToggleFavorite = async () => {
     if (!book) return
 
-    if (isFavorite) {
-      removeFromFavorites(book.id)
-      toast.info(`Removed ${book.name} from favorites`)
-    } else {
-      addToFavorites(book)
-      toast.success(`Added ${book.name} to favorites!`)
+    try {
+      if (isFavorite) {
+        const success = await removeFromFavorites(book.id)
+        if (success) {
+          toast.info(`Removed ${book.name} from favorites`)
+          setIsFavorite(false)
+        } else {
+          toast.error("Failed to remove from favorites")
+        }
+      } else {
+        const success = await addToFavorites(book.id)
+        if (success) {
+          toast.success(`Added ${book.name} to favorites!`)
+          setIsFavorite(true)
+        } else {
+          toast.error("Failed to add to favorites")
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error)
+      toast.error("An error occurred. Please try again.")
     }
-    setIsFavorite(!isFavorite)
   }
 
   let book_id = 0
@@ -73,25 +89,42 @@ const DetailBook: React.FC = () => {
     console.error("Error", error)
   }
 
+  // Update the useEffect to check if book is in favorites
   useEffect(() => {
-    findBookById(book_id)
-      .then((book) => {
-        setBook(book)
-        setLoading(false)
-        if (book) {
-          setIsFavorite(isInFavorites(book.id))
+    const fetchData = async () => {
+      try {
+        const bookData = await findBookById(book_id)
+        setBook(bookData)
+
+        if (bookData) {
+          setCheckingFavorite(true)
+          const favoriteStatus = await isInFavorites(bookData.id)
+          setIsFavorite(favoriteStatus)
+          setCheckingFavorite(false)
         }
-      })
-      .catch((error) => {
-        setError(error)
-      })
+
+        setLoading(false)
+      } catch (error) {
+        console.error("Error fetching book data:", error)
+        // setError(error)
+        setLoading(false)
+        setCheckingFavorite(false)
+      }
+    }
+
+    fetchData()
   }, [book_id])
 
   // Listen for favorites updates
   useEffect(() => {
-    const handleFavoritesUpdate = () => {
+    const handleFavoritesUpdate = async () => {
       if (book) {
-        setIsFavorite(isInFavorites(book.id))
+        try {
+          const result = await isInFavorites(book.id)
+          setIsFavorite(result)
+        } catch (error) {
+          console.error("Error checking favorites:", error)
+        }
       }
     }
 
@@ -104,24 +137,37 @@ const DetailBook: React.FC = () => {
 
   if (loading) {
     return (
-      <div>
-        <h1>The Page is loading ...</h1>
+      <div className="container mt-5 text-center">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-2">Loading book details...</p>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div>
-        <h1>It has error: ${error}</h1>
+      <div className="container mt-5">
+        <div className="alert alert-danger">
+          <h3>Error Loading Book</h3>
+          <p>There was a problem loading the book details. Please try again later.</p>
+          <Link to="/" className="btn btn-primary mt-3">
+            Return to Home
+          </Link>
+        </div>
       </div>
     )
   }
 
   if (!book) {
     return (
-      <div>
-        <h1>This Book is not existed</h1>
+      <div className="container mt-5 text-center">
+        <h3>Book Not Found</h3>
+        <p>The book you're looking for doesn't exist or has been removed.</p>
+        <Link to="/" className="btn btn-primary mt-3">
+          Return to Home
+        </Link>
       </div>
     )
   }
@@ -140,8 +186,13 @@ const DetailBook: React.FC = () => {
                 <button
                   className={`btn ${isFavorite ? "btn-danger" : "btn-light border"}`}
                   onClick={handleToggleFavorite}
+                  disabled={checkingFavorite}
                 >
-                  <i className="fas fa-heart"></i>
+                  {checkingFavorite ? (
+                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  ) : (
+                    <i className="fas fa-heart"></i>
+                  )}
                 </button>
               </div>
               <h4 className="text-danger fw-bold">{FormatNumber(book.priceSell)} VND</h4>
@@ -215,4 +266,3 @@ const DetailBook: React.FC = () => {
   )
 }
 export default DetailBook
-

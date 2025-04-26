@@ -5,6 +5,7 @@ import { type ChangeEvent, useEffect, useState } from "react"
 import { Search } from "react-bootstrap-icons"
 import { Link, useNavigate } from "react-router-dom"
 import { jwtDecode } from "jwt-decode"
+import { getFavorites } from "../../utils/favoriteUtils"
 
 interface NavBarProps {
   searchKey: string
@@ -36,8 +37,13 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
         setCartItems(cart.length)
 
         // Get favorites count
-        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]")
-        setFavoritesItems(favorites.length)
+        getFavorites()
+          .then((favorites) => {
+            setFavoritesItems(favorites.length)
+          })
+          .catch((error) => {
+            console.error("Error fetching favorites count:", error)
+          })
       } catch (error) {
         console.error("Invalid token", error)
         localStorage.removeItem("token")
@@ -51,20 +57,27 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
     const handleStorageChange = () => {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]")
       setCartItems(cart.length)
+    }
 
-      const favorites = JSON.parse(localStorage.getItem("favorites") || "[]")
-      setFavoritesItems(favorites.length)
+    const handleFavoritesUpdate = () => {
+      getFavorites()
+        .then((favorites) => {
+          setFavoritesItems(favorites.length)
+        })
+        .catch((error) => {
+          console.error("Error fetching favorites count:", error)
+        })
     }
 
     window.addEventListener("storage", handleStorageChange)
     // Custom event for our app
     window.addEventListener("cartUpdated", handleStorageChange)
-    window.addEventListener("favoritesUpdated", handleStorageChange)
+    window.addEventListener("favoritesUpdated", handleFavoritesUpdate)
 
     return () => {
       window.removeEventListener("storage", handleStorageChange)
       window.removeEventListener("cartUpdated", handleStorageChange)
-      window.removeEventListener("favoritesUpdated", handleStorageChange)
+      window.removeEventListener("favoritesUpdated", handleFavoritesUpdate)
     }
   }, [])
 
@@ -307,4 +320,3 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
   )
 }
 export default NavBar
-
