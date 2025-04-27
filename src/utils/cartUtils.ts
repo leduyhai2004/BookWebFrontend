@@ -66,3 +66,8 @@ export const getCartItemCount = (): number => {
   return cart.reduce((count, item) => count + item.quantity, 0)
 }
 
+// Clear cart
+export const clearCart = (): void => {
+  localStorage.removeItem("cart")
+  window.dispatchEvent(new Event("cartUpdated"))
+}

@@ -129,6 +129,11 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
               </Link>
             </li>
             <li className="nav-item">
+              <Link className="nav-link" aria-current="page" to="/orders">
+                Đơn hàng
+              </Link>
+            </li>
+            <li className="nav-item">
               <a className="nav-link" href="#">
                 Liên hệ
               </a>

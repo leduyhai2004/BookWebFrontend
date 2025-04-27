@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import type { CartItem } from "../../models/CartItem"
 import { getCart, removeFromCart, updateCartItemQuantity, calculateCartTotal } from "../../utils/cartUtils"
 import FormatNumber from "../utils/FormatNumber"
@@ -12,6 +12,7 @@ import BookImage from "../product/components/BookImageThumbnail"
 const CartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [totalPrice, setTotalPrice] = useState<number>(0)
+  const navigate = useNavigate()
 
   useEffect(() => {
     loadCartItems()
@@ -40,6 +41,25 @@ const CartPage: React.FC = () => {
 
     updateCartItemQuantity(bookId, quantity)
     loadCartItems()
+  }
+
+  const handleProceedToCheckout = () => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token")
+    if (!token) {
+      toast.error("Please log in to proceed with checkout")
+      navigate("/login")
+      return
+    }
+
+    // Check if cart is empty
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty")
+      return
+    }
+
+    // Navigate to checkout page
+    navigate("/checkout")
   }
 
   return (
@@ -140,7 +160,9 @@ const CartPage: React.FC = () => {
                     <span>Total:</span>
                     <span>{FormatNumber(totalPrice)} VND</span>
                   </div>
-                  <button className="btn btn-primary w-100 mt-3">Proceed to Checkout</button>
+                  <button className="btn btn-primary w-100 mt-3" onClick={handleProceedToCheckout}>
+                    Proceed to Checkout
+                  </button>
                 </div>
               </div>
             </div>
@@ -168,4 +190,3 @@ const CartPage: React.FC = () => {
 }
 
 export default CartPage
-
