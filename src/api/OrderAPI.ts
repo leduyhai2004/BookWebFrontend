@@ -71,6 +71,64 @@ export const getUserOrders = async (): Promise<Order[]> => {
   }
 }
 
+// Get payment method details by ID
+export const getPaymentMethodById = async (paymentId: number): Promise<Payment> => {
+  try {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    const response = await fetch(`http://localhost:8080/payments/${paymentId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Failed to fetch payment method: ${response.status} ${errorText}`)
+      throw new Error("Failed to fetch payment method")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error(`Error fetching payment method with ID ${paymentId}:`, error)
+    // Return a default payment object if the fetch fails
+    return { id: paymentId, nameOfPayment: "Unknown payment method" }
+  }
+}
+
+// Get delivery method details by ID
+export const getDeliveryMethodById = async (deliveryMethodId: number): Promise<DeliveryMethod> => {
+  try {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    const response = await fetch(`http://localhost:8080/delivery-methods/${deliveryMethodId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Failed to fetch delivery method: ${response.status} ${errorText}`)
+      throw new Error("Failed to fetch delivery method")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error(`Error fetching delivery method with ID ${deliveryMethodId}:`, error)
+    // Return a default delivery method object if the fetch fails
+    return { id: deliveryMethodId, nameOfDeliveryMethod: "Unknown delivery method" }
+  }
+}
+
 // Update the getPaymentMethods function to use the new endpoint
 export const getPaymentMethods = async (): Promise<Payment[]> => {
   try {

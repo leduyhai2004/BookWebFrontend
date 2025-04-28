@@ -4,13 +4,25 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import type { Order, DeliveryStatus, PaymentStatus } from "../../models/Order"
-import { getUserOrders } from "../../api/OrderAPI"
+import type { Order, DeliveryStatus, PaymentStatus, OrderItem } from "../../models/Order"
+import { getUserOrders, getPaymentMethodById, getDeliveryMethodById } from "../../api/OrderAPI"
 import FormatNumber from "../utils/FormatNumber"
+import BookImage from "../product/components/BookImageThumbnail"
+
+// Interface for enhanced order with payment and delivery method names
+interface EnhancedOrder extends Order {
+  paymentMethodName?: string
+  deliveryMethodName?: string
+}
+
+// Interface for enhanced order item with book details
+interface EnhancedOrderItem extends OrderItem {
+  bookName?: string
+}
 
 const OrdersPage: React.FC = () => {
   const navigate = useNavigate()
-  const [orders, setOrders] = useState<Order[]>([])
+  const [orders, setOrders] = useState<EnhancedOrder[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,12 +35,41 @@ const OrdersPage: React.FC = () => {
       return
     }
 
-    // Fetch user orders
+    // Fetch user orders with enhanced details
     const fetchOrders = async () => {
       try {
         setIsLoading(true)
         const userOrders = await getUserOrders()
-        setOrders(userOrders)
+
+        // Enhance orders with payment and delivery method names
+        const enhancedOrders = await Promise.all(
+          userOrders.map(async (order) => {
+            try {
+              // Fetch payment method details
+              const paymentMethod = await getPaymentMethodById(order.paymentId)
+
+              // Fetch delivery method details
+              const deliveryMethod = await getDeliveryMethodById(order.deliveryMethodId)
+
+              // Return enhanced order with method names
+              return {
+                ...order,
+                paymentMethodName: paymentMethod.nameOfPayment,
+                deliveryMethodName: deliveryMethod.nameOfDeliveryMethod,
+              }
+            } catch (error) {
+              console.error(`Error enhancing order ${order.id}:`, error)
+              // Return original order if enhancement fails
+              return {
+                ...order,
+                paymentMethodName: "Unknown",
+                deliveryMethodName: "Unknown",
+              }
+            }
+          }),
+        )
+
+        setOrders(enhancedOrders)
         setIsLoading(false)
       } catch (error) {
         console.error("Error fetching orders:", error)
@@ -124,6 +165,12 @@ const OrdersPage: React.FC = () => {
                     <div className="col-md-6">
                       <h6>Delivery Address:</h6>
                       <p>{order.addressOfBuyer}</p>
+
+                      <h6>Payment Method:</h6>
+                      <p>{order.paymentMethodName || `ID: ${order.paymentId}`}</p>
+
+                      <h6>Delivery Method:</h6>
+                      <p>{order.deliveryMethodName || `ID: ${order.deliveryMethodId}`}</p>
                     </div>
                     <div className="col-md-6 text-md-end">
                       <h6>Total Amount:</h6>
@@ -136,7 +183,7 @@ const OrdersPage: React.FC = () => {
                     <table className="table table-sm">
                       <thead className="table-light">
                         <tr>
-                          <th>Book ID</th>
+                          <th>Book</th>
                           <th>Quantity</th>
                           <th>Price</th>
                           <th>Total</th>
@@ -146,7 +193,14 @@ const OrdersPage: React.FC = () => {
                         {order.items.map((item, index) => (
                           <tr key={index}>
                             <td>
-                              <Link to={`/books/${item.bookId}`}>#{item.bookId}</Link>
+                              <div className="d-flex align-items-center">
+                                <Link to={`/books/${item.bookId}`}>
+                                  <BookImage bookId={item.bookId} width="50px" height="70px" className="me-2" />
+                                </Link>
+                                <Link to={`/books/${item.bookId}`} className="text-decoration-none">
+                                  #{item.bookId}
+                                </Link>
+                              </div>
                             </td>
                             <td>{item.quantity}</td>
                             <td>{FormatNumber(item.price)} VND</td>
@@ -156,11 +210,6 @@ const OrdersPage: React.FC = () => {
                       </tbody>
                     </table>
                   </div>
-                </div>
-                <div className="card-footer bg-white">
-                  <small className="text-muted">
-                    Payment Method ID: {order.paymentId} | Delivery Method ID: {order.deliveryMethodId}
-                  </small>
                 </div>
               </div>
             </div>
