@@ -22,6 +22,9 @@ import CartPage from "./layout/cart/CartPage"
 import FavoritesPage from "./layout/favourites/FavouritesPage"
 import CheckoutPage from "./layout/checkout/CheckoutPage"
 import OrdersPage from "./layout/orders/OrdersPage"
+import UserOrderEditPage from "./layout/orders/UserOrderEditPage"
+import AdminOrdersPage_Admin from "./layout/admin/orders/AdminOrdersPage"
+import AdminOrderEditPage_Admin from "./layout/admin/orders/AdminOrderEditPage"
 import { ToastContainer } from "react-toastify"
 
 function App() {
@@ -45,11 +48,14 @@ function App() {
           <Route path="/admin/book-form" element={<BookForm_Admin />} />
           <Route path="/admin/books" element={<BookList_Admin />} />
           <Route path="/admin/book-form/:id" element={<BookUpdateForm_Admin />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage_Admin />} />
+          <Route path="/admin/orders/edit/:id" element={<AdminOrderEditPage_Admin />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/edit/:id" element={<UserOrderEditPage />} />
         </Routes>
         <Footer />
       </BrowserRouter>

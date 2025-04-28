@@ -4,10 +4,12 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import type { Order, DeliveryStatus, PaymentStatus, OrderItem } from "../../models/Order"
-import { getUserOrders, getPaymentMethodById, getDeliveryMethodById } from "../../api/OrderAPI"
+import type { Order } from "../../models/Order"
+import { DeliveryStatus, PaymentStatus } from "../../models/Order"
+import { getUserOrders, getPaymentMethodById, getDeliveryMethodById, deleteOrder } from "../../api/OrderAPI"
 import FormatNumber from "../utils/FormatNumber"
 import BookImage from "../product/components/BookImageThumbnail"
+import { Pencil, Trash } from "react-bootstrap-icons"
 
 // Interface for enhanced order with payment and delivery method names
 interface EnhancedOrder extends Order {
@@ -15,16 +17,12 @@ interface EnhancedOrder extends Order {
   deliveryMethodName?: string
 }
 
-// Interface for enhanced order item with book details
-interface EnhancedOrderItem extends OrderItem {
-  bookName?: string
-}
-
 const OrdersPage: React.FC = () => {
   const navigate = useNavigate()
   const [orders, setOrders] = useState<EnhancedOrder[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     // Check if user is logged in
@@ -36,63 +34,104 @@ const OrdersPage: React.FC = () => {
     }
 
     // Fetch user orders with enhanced details
-    const fetchOrders = async () => {
-      try {
-        setIsLoading(true)
-        const userOrders = await getUserOrders()
-
-        // Enhance orders with payment and delivery method names
-        const enhancedOrders = await Promise.all(
-          userOrders.map(async (order) => {
-            try {
-              // Fetch payment method details
-              const paymentMethod = await getPaymentMethodById(order.paymentId)
-
-              // Fetch delivery method details
-              const deliveryMethod = await getDeliveryMethodById(order.deliveryMethodId)
-
-              // Return enhanced order with method names
-              return {
-                ...order,
-                paymentMethodName: paymentMethod.nameOfPayment,
-                deliveryMethodName: deliveryMethod.nameOfDeliveryMethod,
-              }
-            } catch (error) {
-              console.error(`Error enhancing order ${order.id}:`, error)
-              // Return original order if enhancement fails
-              return {
-                ...order,
-                paymentMethodName: "Unknown",
-                deliveryMethodName: "Unknown",
-              }
-            }
-          }),
-        )
-
-        setOrders(enhancedOrders)
-        setIsLoading(false)
-      } catch (error) {
-        console.error("Error fetching orders:", error)
-        setError("Failed to load orders. Please try again.")
-        setIsLoading(false)
-      }
-    }
-
     fetchOrders()
   }, [navigate])
 
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true)
+      let userOrders: Order[] = []
+
+      try {
+        userOrders = await getUserOrders()
+      } catch (error) {
+        console.error("Error fetching user orders:", error)
+        toast.error("There was an issue loading your orders")
+        setOrders([])
+        setIsLoading(false)
+        return
+      }
+
+      // Enhance orders with payment and delivery method names
+      const enhancedOrders = await Promise.all(
+        userOrders.map(async (order) => {
+          try {
+            // Fetch payment method details
+            let paymentMethodName = "Unknown"
+            let deliveryMethodName = "Unknown"
+
+            try {
+              const paymentMethod = await getPaymentMethodById(order.paymentId)
+              paymentMethodName = paymentMethod.nameOfPayment
+            } catch (error) {
+              console.error(`Error fetching payment method for order ${order.id}:`, error)
+            }
+
+            try {
+              // Fetch delivery method details
+              const deliveryMethod = await getDeliveryMethodById(order.deliveryMethodId)
+              deliveryMethodName = deliveryMethod.nameOfDeliveryMethod
+            } catch (error) {
+              console.error(`Error fetching delivery method for order ${order.id}:`, error)
+            }
+
+            // Return enhanced order with method names
+            return {
+              ...order,
+              paymentMethodName,
+              deliveryMethodName,
+            }
+          } catch (error) {
+            console.error(`Error enhancing order ${order.id}:`, error)
+            // Return original order if enhancement fails
+            return {
+              ...order,
+              paymentMethodName: "Unknown",
+              deliveryMethodName: "Unknown",
+            }
+          }
+        }),
+      )
+
+      setOrders(enhancedOrders)
+      setIsLoading(false)
+    } catch (error) {
+      console.error("Error fetching orders:", error)
+      setError("Failed to load orders. Please try again.")
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteOrder = async (orderId: number) => {
+    if (window.confirm("Are you sure you want to delete this order?")) {
+      try {
+        setIsDeleting(true)
+        await deleteOrder(orderId)
+        toast.success("Order deleted successfully")
+        // Refresh the orders list
+        fetchOrders()
+      } catch (error) {
+        console.error("Error deleting order:", error)
+        toast.error("Failed to delete order")
+      } finally {
+        setIsDeleting(false)
+      }
+    }
+  }
+
   // Helper function to get status badge class
-  const getStatusBadgeClass = (status: PaymentStatus | DeliveryStatus) => {
+  const getStatusBadgeClass = (status: PaymentStatus | DeliveryStatus | string) => {
     switch (status) {
-      case "PENDING":
+      case PaymentStatus.PENDING:
+      case DeliveryStatus.PENDING:
         return "bg-warning"
-      case "PAID":
-      case "DELIVERED":
+      case PaymentStatus.PAID:
+      case DeliveryStatus.DELIVERED:
         return "bg-success"
-      case "SHIPPED":
+      case DeliveryStatus.SHIPPED:
         return "bg-info"
-      case "FAILED":
-      case "CANCELLED":
+      case PaymentStatus.FAILED:
+      case DeliveryStatus.CANCELLED:
         return "bg-danger"
       default:
         return "bg-secondary"
@@ -150,13 +189,33 @@ const OrdersPage: React.FC = () => {
                 <div className="card-header bg-light">
                   <div className="d-flex justify-content-between align-items-center">
                     <h5 className="mb-0">Order #{order.id}</h5>
-                    <div>
-                      <span className={`badge ${getStatusBadgeClass(order.paymentStatus)} me-2`}>
-                        Payment: {order.paymentStatus}
-                      </span>
-                      <span className={`badge ${getStatusBadgeClass(order.deliveryStatus)}`}>
-                        Delivery: {order.deliveryStatus}
-                      </span>
+                    <div className="d-flex align-items-center">
+                      <div className="me-3">
+                        <span className={`badge ${getStatusBadgeClass(order.paymentStatus)} me-2`}>
+                          Payment: {order.paymentStatus}
+                        </span>
+                        <span className={`badge ${getStatusBadgeClass(order.deliveryStatus)}`}>
+                          Delivery: {order.deliveryStatus}
+                        </span>
+                      </div>
+                      <div className="btn-group" role="group">
+                        <Link
+                          to={`/orders/edit/${order.id}`}
+                          className="btn btn-sm btn-warning me-1"
+                          title="Edit Address"
+                          onClick={() => console.log(`Navigating to edit order ${order.id}`)}
+                        >
+                          <Pencil />
+                        </Link>
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDeleteOrder(order.id)}
+                          disabled={isDeleting}
+                          title="Delete"
+                        >
+                          <Trash />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

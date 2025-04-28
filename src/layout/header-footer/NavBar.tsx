@@ -206,6 +206,11 @@ function NavBar({ searchKey, setSearchKey }: NavBarProps) {
                       Add New Book
                     </Link>
                   </li>
+                  <li>
+                    <Link className="dropdown-item" to="/admin/orders">
+                      Manage Orders
+                    </Link>
+                  </li>
                 </ul>
               </li>
             )}

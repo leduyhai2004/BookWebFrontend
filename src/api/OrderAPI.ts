@@ -1,4 +1,5 @@
 import type { Order, OrderRequest, Payment, DeliveryMethod } from "../models/Order"
+import { PaymentStatus, DeliveryStatus } from "../models/Order"
 
 // Create a new order
 export const createOrder = async (orderData: OrderRequest): Promise<Order | null> => {
@@ -67,6 +68,175 @@ export const getUserOrders = async (): Promise<Order[]> => {
     return await response.json()
   } catch (error) {
     console.error("Error fetching orders:", error)
+    throw error
+  }
+}
+
+// Get all orders for admin
+export const getAdminOrders = async (): Promise<Order[]> => {
+  try {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    const response = await fetch("http://localhost:8080/api/orders/admin/all", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Failed to fetch admin orders: ${response.status} ${errorText}`)
+      throw new Error("Failed to fetch admin orders")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error("Error fetching admin orders:", error)
+    throw error
+  }
+}
+
+// Get a single order by ID
+export const getOrderById = async (orderId: number): Promise<Order> => {
+  try {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    const response = await fetch(`http://localhost:8080/api/orders/${orderId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Failed to fetch order: ${response.status} ${errorText}`)
+      throw new Error("Failed to fetch order")
+    }
+
+    // Try to parse the response as JSON, but handle potential parsing errors
+    try {
+      return await response.json()
+    } catch (parseError) {
+      console.error(`Error parsing order JSON: ${parseError}`)
+
+      // If we can't parse the JSON due to nesting depth issues, try to fetch a simplified version
+      // or construct a minimal order object with the available information
+      return {
+        id: orderId,
+        addressOfBuyer: "Unable to load full address",
+        price: 0,
+        paymentId: 0,
+        deliveryMethodId: 0,
+        items: [],
+        paymentStatus: PaymentStatus.PENDING,
+        deliveryStatus: DeliveryStatus.PENDING,
+      }
+    }
+  } catch (error) {
+    console.error(`Error fetching order with ID ${orderId}:`, error)
+    throw error
+  }
+}
+
+// Update order as admin
+export const updateOrderAsAdmin = async (
+  orderId: number,
+  deliveryStatus: string,
+  paymentStatus: string,
+  addressOfBuyer: string,
+): Promise<Order> => {
+  try {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    const url = `http://localhost:8080/api/orders/admin/${orderId}?deliveryStatus=${encodeURIComponent(
+      deliveryStatus,
+    )}&paymentStatus=${encodeURIComponent(paymentStatus)}&addressOfBuyer=${encodeURIComponent(addressOfBuyer)}`
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Failed to update order: ${response.status} ${errorText}`)
+      throw new Error("Failed to update order")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error(`Error updating order with ID ${orderId}:`, error)
+    throw error
+  }
+}
+
+// Update order address as user
+export const updateOrderAddressAsUser = async (orderId: number, addressOfBuyer: string): Promise<Order> => {
+  try {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    const url = `http://localhost:8080/api/orders/user/${orderId}?addressOfBuyer=${encodeURIComponent(addressOfBuyer)}`
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Failed to update order address: ${response.status} ${errorText}`)
+      throw new Error("Failed to update order address")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error(`Error updating order address with ID ${orderId}:`, error)
+    throw error
+  }
+}
+
+// Delete order
+export const deleteOrder = async (orderId: number): Promise<boolean> => {
+  try {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      throw new Error("Authentication required")
+    }
+
+    const response = await fetch(`http://localhost:8080/api/orders/${orderId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Failed to delete order: ${response.status} ${errorText}`)
+      throw new Error("Failed to delete order")
+    }
+
+    return true
+  } catch (error) {
+    console.error(`Error deleting order with ID ${orderId}:`, error)
     throw error
   }
 }
